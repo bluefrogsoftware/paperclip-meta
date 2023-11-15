@@ -80,19 +80,27 @@ module Paperclip
 
       # Return encoded metadata as String
       def meta_encode(meta)
-        Base64.encode64(Marshal.dump(meta))
+        meta.to_json
       end
 
-      # Return decoded metadata as Object
+      # Return decoded metadata as Hash
       def meta_decode(meta)
-        Marshal.load(Base64.decode64(meta))
+        with_indifferent_access_deeply(JSON.parse(meta))
       end
 
       # Retain existing meta values that will not be recalculated when
       # reprocessing a subset of styles
-      def merge_existing_meta_hash(meta)
-        return unless (original_meta = instance.send("#{name}_meta"))
-        meta.reverse_merge! meta_decode(original_meta)
+      def merge_existing_meta_hash(new_meta)
+        if (original_meta = instance.send("#{name}_meta"))
+          existing_meta = meta_decode(original_meta)
+          new_meta.deep_merge!(existing_meta) # Use `deep_merge!` to ensure nested hashes are merged
+        end
+      end
+
+      def with_indifferent_access_deeply(hash)
+        hash.each_with_object({}.with_indifferent_access) do |(key, value), new_hash|
+          new_hash[key] = value.is_a?(Hash) ? with_indifferent_access_deeply(value) : value
+        end
       end
     end
   end
