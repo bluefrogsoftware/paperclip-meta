@@ -85,6 +85,16 @@ module Paperclip
 
       # Return decoded metadata as Hash
       def meta_decode(meta)
+        if meta.is_a?(String)
+          begin
+            # Assuming the string is serialized in a format like JSON
+            meta = JSON.parse(meta)
+          rescue JSON::ParserError
+            # Handle the case where the string cannot be parsed
+            return {}.with_indifferent_access
+          end
+        end
+
         with_indifferent_access_deeply(meta)
       end
 
