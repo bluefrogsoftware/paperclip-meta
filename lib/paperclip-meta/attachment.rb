@@ -80,12 +80,12 @@ module Paperclip
 
       # Return encoded metadata as String
       def meta_encode(meta)
-        meta.to_json
+        meta
       end
 
       # Return decoded metadata as Hash
       def meta_decode(meta)
-        with_indifferent_access_deeply(JSON.parse(meta))
+        with_indifferent_access_deeply(meta)
       end
 
       # Retain existing meta values that will not be recalculated when
